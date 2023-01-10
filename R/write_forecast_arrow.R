@@ -21,7 +21,7 @@ write_forecast_arrow <- function(da_forecast_output,
 
 
   if(use_s3){
-    if(is.null(bucket) | is.null(endpoint)){
+    if(is.null(bucket) || is.null(endpoint)){
       stop("scoring function needs bucket and endpoint if use_s3=TRUE")
     }
 
@@ -211,6 +211,7 @@ write_forecast_arrow <- function(da_forecast_output,
 
 
   reference_datetime_format <- "%Y-%m-%d %H:%M:%S"
+  message("here goes nothing")
 
   output_list <- output_list |> mutate(reference_datetime = strftime(lubridate::as_datetime(reference_datetime),format=reference_datetime_format,tz = "UTC"))
   message("starting writing dataset")
