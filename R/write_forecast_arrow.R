@@ -24,10 +24,14 @@ write_forecast_arrow <- function(da_forecast_output,
     if(is.null(bucket) || is.null(endpoint)){
       stop("scoring function needs bucket and endpoint if use_s3=TRUE")
     }
+    message("Step 1.1")
 
     vars <- FLAREr:::arrow_env_vars()
+    message("Step 1.2")
+
     output_directory <- arrow::s3_bucket(bucket = bucket,
                                          endpoint_override =  endpoint)
+    message("Step 1.3")
     on.exit(unset_arrow_vars(vars))
     message("Step 2")
 
