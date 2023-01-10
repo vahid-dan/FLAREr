@@ -19,7 +19,7 @@ write_forecast_arrow <- function(da_forecast_output,
                                  endpoint = NULL,
                                  local_directory = NULL){
 
-
+  message("Step 1")
   if(use_s3){
     if(is.null(bucket) || is.null(endpoint)){
       stop("scoring function needs bucket and endpoint if use_s3=TRUE")
@@ -29,13 +29,15 @@ write_forecast_arrow <- function(da_forecast_output,
     output_directory <- arrow::s3_bucket(bucket = bucket,
                                          endpoint_override =  endpoint)
     on.exit(unset_arrow_vars(vars))
+    message("Step 2")
+
   }else{
     if(is.null(local_directory)){
       stop("scoring function needs local_directory if use_s3=FALSE")
     }
     output_directory <- arrow::SubTreeFileSystem$create(local_directory)
   }
-
+  message("Step 3")
   x <- da_forecast_output$x
   pars <- da_forecast_output$pars
   lake_depth <- da_forecast_output$lake_depth
@@ -49,12 +51,12 @@ write_forecast_arrow <- function(da_forecast_output,
   obs_config <- da_forecast_output$obs_config
   pars_config <- da_forecast_output$pars_config
   diagnostics <- da_forecast_output$diagnostics
-
+  message("Step 4")
   forecast_flag[which(is.na(forecast_flag))] <- 0
 
   indexes <- expand.grid(1:dim(x)[1], 1:dim(x)[2], 1:dim(x)[3])
   ensembles <- 1:dim(x)[4]
-
+  message("Step 5")
   output_list <- purrr::map_dfr(1:nrow(indexes), function(i, indexes){
     var1 <- indexes$Var1[i]
     var2 <- indexes$Var2[i]
@@ -69,7 +71,7 @@ write_forecast_arrow <- function(da_forecast_output,
   },
   indexes = indexes
   )
-
+  message("Step 6")
   tmp_index <- 0
   for(s in 1:length(obs_config$state_names_obs)){
     if(!obs_config$state_names_obs[s] %in% states_config$state_names){
@@ -86,7 +88,7 @@ write_forecast_arrow <- function(da_forecast_output,
           }
         }
       }
-
+    message("Step 7")
     indexes <- expand.grid(1:dim(temp_var)[1], 1:dim(temp_var)[2])
 
     output_list_tmp <- purrr::map_dfr(1:nrow(indexes), function(i, indexes){
@@ -106,7 +108,7 @@ write_forecast_arrow <- function(da_forecast_output,
     }
   }
 
-
+  message("Step 8")
   if(length(config$output_settings$diagnostics_names) > 0){
 
     indexes <- expand.grid(1:dim(diagnostics)[1], 1:dim(diagnostics)[2], 1:dim(diagnostics)[3])
@@ -127,7 +129,7 @@ write_forecast_arrow <- function(da_forecast_output,
     )
     output_list <- dplyr::bind_rows(output_list, output_list2)
   }
-
+  message("Step 9")
   if(!is.null(pars)){
     indexes <- expand.grid(1:dim(pars)[1], 1:dim(pars)[2])
 
